@@ -1,8 +1,10 @@
 package ImageHoster.controller;
 
+import ImageHoster.model.Comment;
 import ImageHoster.model.Image;
 import ImageHoster.model.Tag;
 import ImageHoster.model.User;
+import ImageHoster.service.CommentService;
 import ImageHoster.service.ImageService;
 import ImageHoster.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class ImageController {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private CommentService commentService;
+
     //This method displays all the images in the user home page after successful login
     @RequestMapping("images")
     public String getUserImages(Model model) {
@@ -50,6 +55,7 @@ public class ImageController {
         Image image = imageService.getImageByTitle(imageId,title);
         model.addAttribute("image", image);
         model.addAttribute("tags", image.getTags());
+        model.addAttribute("comments", commentService.ShowComments(image));
         return "images/image";
     }
 
@@ -104,7 +110,12 @@ public class ImageController {
         else{
             String error = "Only the owner of the image can edit the image";
             model.addAttribute("editError", error);
-            return "images/image";
+            if(commentService.ShowComments(image)== null){ // Handles null exception in case no comments are posted at that time
+                System.out.println("No comments posted yet");
+                return "images/image";}
+            else{
+            model.addAttribute("comments", commentService.ShowComments(image));
+            return "images/image";}
         }
 
     }
@@ -158,7 +169,13 @@ public class ImageController {
         else{
             String error = "Only the owner of the image can delete the image";
             model.addAttribute("deleteError",error);
-            return "images/image";
+            if(commentService.ShowComments(image)== null){ // Handles null exception in case no comments are posted at that time
+                System.out.println("No comments posted yet");
+                return "images/image";}
+            else{
+            model.addAttribute("comments", commentService.ShowComments(image));
+
+            return "images/image";}
         }
     }
 
